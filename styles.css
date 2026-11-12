@@ -111,17 +111,22 @@ html, body {
 }
 .cloud-1 { --s: .85; } .cloud-2 { --s: 1.05; } .cloud-3 { --s: .7; } .cloud-4 { --s: .62; }
 
-/* 风筝 */
+/* 风筝（前景层，保证任何尺寸下都清晰可见） */
+.kite-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
 .kite-wrap {
   position: absolute;
-  top: 0.5%;
-  left: 50%;
-  margin-left: -58px;
-  width: 116px;
+  top: 1.5%;
+  left: 1.5%;
+  width: 128px;
   animation: floatKite 7s ease-in-out infinite;
 }
 @media (min-width: 900px) {
-  .kite-wrap { left: 3%; margin-left: 0; width: 170px; top: 7%; }
+  .kite-wrap { left: auto; right: 2.5%; top: 5%; width: 168px; }
 }
 .kite {
   width: 100%;
