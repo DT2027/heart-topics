@@ -1,0 +1,9 @@
+{
+  "name": "heart-topics",
+  "version": "1.0.0",
+  "private": true,
+  "description": "真心话题库 · 500 道可聊的真心话题，输入题号即抽取",
+  "scripts": {
+    "build": "node scripts/build-questions.js"
+  }
+}
