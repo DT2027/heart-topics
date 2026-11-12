@@ -301,6 +301,7 @@
 
   renderHistory();
   updateStepButtons();
+  syncUrl();
 
   // 支持 URL 片段直达： #42
   var hash = parseInt(String(window.location.hash).replace('#', ''), 10);
