@@ -20,34 +20,62 @@
   var emptyEl    = $('#history-empty');
   var countEl    = $('#hist-count');
   var clearBtn   = $('#clear-btn');
+  var shareBtn   = $('#share-btn');
   var randomBtn  = $('#random-btn');
   var prevBtn    = $('#prev-btn');
   var nextBtn    = $('#next-btn');
   var copyBtn    = $('#copy-btn');
 
   var STORAGE_KEY = 'zhixin-topics-history-v1';
+  var COOKIE_KEY = 'zhixin_topics_seen';
+  var COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 一年
   var history = loadHistory();
   var current = null;
 
-  /* ---------- 存储 ---------- */
-  function loadHistory() {
+  /* ---------- 存储：localStorage 为主，cookie 兜底 ---------- */
+  function normalize(arr) {
+    if (!Array.isArray(arr)) return [];
+    return arr.map(Number).filter(function (n) {
+      return Number.isInteger(n) && n >= 1 && n <= TOTAL;
+    });
+  }
+
+  function readCookie() {
     try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return [];
-      var arr = JSON.parse(raw);
-      if (!Array.isArray(arr)) return [];
-      return arr.map(Number).filter(function (n) {
-        return Number.isInteger(n) && n >= 1 && n <= TOTAL;
-      });
+      var re = new RegExp('(?:^|;\\s*)' + COOKIE_KEY + '=([^;]*)');
+      var m = document.cookie.match(re);
+      if (!m) return [];
+      return normalize(JSON.parse(decodeURIComponent(m[1])));
     } catch (e) {
       return [];
     }
   }
 
-  function saveHistory() {
+  function writeCookie(list) {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+      document.cookie =
+        COOKIE_KEY + '=' + encodeURIComponent(JSON.stringify(list)) +
+        '; path=/; max-age=' + COOKIE_MAX_AGE + '; SameSite=Lax';
+    } catch (e) { /* 忽略 */ }
+  }
+
+  function loadHistory() {
+    var fromLS = [];
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) fromLS = normalize(JSON.parse(raw));
+    } catch (e) { /* 隐私模式或被禁用 */ }
+    // 合并 cookie 兜底数据，任一存储可用即可恢复
+    var merged = fromLS.concat(readCookie());
+    return Array.from(new Set(merged)).sort(function (a, b) { return a - b; });
+  }
+
+  function saveHistory() {
+    var payload = JSON.stringify(history);
+    try {
+      localStorage.setItem(STORAGE_KEY, payload);
     } catch (e) { /* 隐私模式下忽略 */ }
+    writeCookie(history);
   }
 
   /* ---------- 渲染 ---------- */
@@ -196,11 +224,67 @@
     renderHistory();
   });
 
+  // 复制历史链接：把已浏览题号带进 URL，换设备/换浏览器也能延续
+  shareBtn.addEventListener('click', function () {
+    var base = window.location.origin + window.location.pathname;
+    var link = history.length
+      ? base + '?seen=' + history.join(',')
+      : base;
+    var done = function () {
+      var old = shareBtn.textContent;
+      shareBtn.textContent = '已复制 ✓';
+      setTimeout(function () { shareBtn.textContent = old; }, 1600);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(link).then(done, fallback);
+    } else {
+      fallback();
+    }
+    function fallback() {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = link;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        done();
+      } catch (e) {
+        shareBtn.textContent = '复制失败';
+      }
+    }
+  });
+
   input.addEventListener('input', function () {
     if (!errorEl.hidden) clearError();
   });
 
   /* ---------- 初始化 ---------- */
+
+  // 1) 合并链接里携带的已浏览题号（?seen=1,2,3），实现跨设备/跨浏览器延续
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var seen = params.get('seen');
+    if (seen) {
+      var extra = normalize(seen.split(',').map(function (s) { return parseInt(s, 10); }));
+      if (extra.length) {
+        history = Array.from(new Set(history.concat(extra))).sort(function (a, b) { return a - b; });
+        saveHistory();
+      }
+    }
+  } catch (e) { /* 忽略 */ }
+
+  // 2) 跨标签页同步：另一个标签页浏览过题目时，这里同步更新
+  window.addEventListener('storage', function (e) {
+    if (e.key !== STORAGE_KEY) return;
+    var next = loadHistory();
+    if (next.join(',') === history.join(',')) return;
+    history = next;
+    renderHistory();
+  });
+
   renderHistory();
   updateStepButtons();
 

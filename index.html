@@ -6,7 +6,7 @@
 <title>真心话题库 · 500 题</title>
 <meta name="description" content="输入题号，抽取一道刚刚好的真心话题。500 道可聊 3 到 15 分钟的开放式问题。" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 6 L52 26 L32 46 L12 26 Z' fill='%23fb7185'/%3E%3Cpath d='M32 6 L52 26 L32 46 Z' fill='%23a78bfa'/%3E%3C/svg%3E" />
-<link rel="stylesheet" href="styles.css?v=20261112" />
+<link rel="stylesheet" href="styles.css?v=2" />
 </head>
 <body>
 
@@ -91,10 +91,14 @@
     <section class="history">
       <div class="hist-head">
         <h2>已浏览题号 <span id="hist-count" class="count">0</span></h2>
-        <button type="button" id="clear-btn" class="link-btn">清空</button>
+        <div class="hist-actions">
+          <button type="button" id="share-btn" class="link-btn">复制历史链接</button>
+          <button type="button" id="clear-btn" class="link-btn">清空</button>
+        </div>
       </div>
       <div id="history-list" class="chips"></div>
       <p id="history-empty" class="empty">还没有记录，输入一个题号试试。</p>
+      <p class="hint">记录保存在这台设备的浏览器里，关掉页面再回来依然在；换设备可用「复制历史链接」把已浏览题号一起带走。</p>
     </section>
 
     <footer class="foot">
@@ -128,7 +132,7 @@
   </div>
 </div>
 
-<script src="questions.js?v=20261112"></script>
-<script src="app.js?v=20261112"></script>
+<script src="questions.js?v=2"></script>
+<script src="app.js?v=2"></script>
 </body>
 </html>
