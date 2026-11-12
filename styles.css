@@ -114,10 +114,14 @@ html, body {
 /* 风筝 */
 .kite-wrap {
   position: absolute;
-  top: 12%;
-  left: 22%;
-  width: 150px;
+  top: 0.5%;
+  left: 50%;
+  margin-left: -58px;
+  width: 116px;
   animation: floatKite 7s ease-in-out infinite;
+}
+@media (min-width: 900px) {
+  .kite-wrap { left: 3%; margin-left: 0; width: 170px; top: 7%; }
 }
 .kite {
   width: 100%;
