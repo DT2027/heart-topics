@@ -126,7 +126,7 @@ html, body {
   animation: floatKite 7s ease-in-out infinite;
 }
 @media (min-width: 900px) {
-  .kite-wrap { left: auto; right: 2.5%; top: 5%; width: 168px; }
+  .kite-wrap { left: 3%; top: 7%; width: 168px; }
 }
 .kite {
   width: 100%;
