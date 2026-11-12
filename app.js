@@ -76,6 +76,19 @@
       localStorage.setItem(STORAGE_KEY, payload);
     } catch (e) { /* 隐私模式下忽略 */ }
     writeCookie(history);
+    syncUrl();
+  }
+
+  // 把已浏览题号写进当前地址栏（replaceState，不产生新的历史记录）
+  // 这样即使浏览器存储被清理，从浏览器历史/收藏再次进入链接也能看到列表
+  function syncUrl() {
+    if (!window.history || !window.history.replaceState) return;
+    try {
+      var url = new URL(window.location.href);
+      if (history.length) url.searchParams.set('seen', history.join(','));
+      else url.searchParams.delete('seen');
+      window.history.replaceState(null, '', url.toString());
+    } catch (e) { /* 忽略 */ }
   }
 
   /* ---------- 渲染 ---------- */
@@ -283,6 +296,7 @@
     if (next.join(',') === history.join(',')) return;
     history = next;
     renderHistory();
+    syncUrl();
   });
 
   renderHistory();
